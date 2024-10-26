@@ -137,7 +137,7 @@ public class CharacterExaltGUI extends JPanel {
                 int v = e[exaltOrder[j]];
                 sum[j] += v;
                 missing[j] += Math.max(75 - v, 0);
-                grid[i][j].setText("" + v);
+                grid[i][j].setText(displayExalts(v));
             }
         }
 
@@ -152,5 +152,26 @@ public class CharacterExaltGUI extends JPanel {
 
     private JLabel classIcon(int skin, String classString) {
         return new JLabel(classString, ImageBuffer.getOutlinedIcon(skin, 15), JLabel.CENTER);
+    }
+
+    /**
+     * Take in the current exalt count and diplays the information in the GUI.
+     * @param count The current running count
+     * @return The formatted data - Total {RunningCount} | X/5 | {numberUntilNext} Until Next Exalt
+     */
+    private String displayExalts(int count) {
+        if (count < 5) {
+            return String.format("Total {} | 0/5 | {} Until Next Exalt", count, 5 - count);
+        } else if (count < 15) {
+            return String.format("Total {} | 1/5 | {} Until Next Exalt", count, 15 - count);
+        } else if (count < 30) {
+            return String.format("Total {} | 2/5 | {} Until Next Exalt", count, 30 - count);
+        } else if (count < 50) {
+            return String.format("Total {} | 3/5 | {} Until Next Exalt", count, 50 - count);
+        } else if (count < 75) {
+            return String.format("Total {} | 4/5 | {} Until Next Exalt", count, 75 - count);
+        } else {
+            return String.format("Total {} | 5/5 | Done", count);
+        }
     }
 }
