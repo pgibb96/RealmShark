@@ -7,6 +7,7 @@ import tomato.realmshark.enums.CharacterClass;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 public class CharacterExaltGUI extends JPanel {
 
@@ -16,6 +17,7 @@ public class CharacterExaltGUI extends JPanel {
     private final JLabel[][] grid;
     private final TomatoData data;
     private final int charListSize;
+    private static final int[] minToNextDefault = {25, 25, 25, 25, 25, 25, 25, 25};
 
     public CharacterExaltGUI(TomatoData data) {
         INSTANCE = this;
@@ -128,6 +130,7 @@ public class CharacterExaltGUI extends JPanel {
     private void update() {
         int[] sum = new int[8];
         int[] missing = new int[8];
+        int[] minToNext = Arrays.copyOf(minToNextDefault, minToNextDefault.length);
 
         for (int i = 0; i < CharacterClass.CHAR_CLASS_LIST.length; i++) {
             CharacterClass clazz = CharacterClass.CHAR_CLASS_LIST[i];
@@ -135,9 +138,24 @@ public class CharacterExaltGUI extends JPanel {
             if (e == null) continue;
             for (int j = 0; j < 8; j++) {
                 int v = e[exaltOrder[j]];
+                minToNext[exaltOrder[j]] = Math.min(minToNextExalt(v), minToNext[exaltOrder[j]]);
                 sum[j] += v;
                 missing[j] += Math.max(75 - v, 0);
-                grid[i][j].setText(displayExalts(v));
+                grid[i][j].setText("" + v);
+                grid[i][j].setFont(grid[i][j].getFont().deriveFont(Font.PLAIN));
+            }
+        }
+
+        for (int i = 0; i < CharacterClass.CHAR_CLASS_LIST.length; i++) {
+            CharacterClass clazz = CharacterClass.CHAR_CLASS_LIST[i];
+            int[] e = RealmCharacter.exalts.get(clazz.getId());
+            if (e == null) continue;
+            for (int j = 0; j < 8; j++) {
+                int v = e[exaltOrder[j]];
+                if (minToNextExalt(v) == minToNext[exaltOrder[j]]) {
+                    grid[i][j].setText("" + v + " | " + minToNextExalt(v) + " more");
+                    grid[i][j].setFont(grid[i][j].getFont().deriveFont(Font.BOLD));
+                }
             }
         }
 
@@ -157,21 +175,22 @@ public class CharacterExaltGUI extends JPanel {
     /**
      * Take in the current exalt count and diplays the information in the GUI.
      * @param count The current running count
-     * @return The formatted data - Total {RunningCount} | X/5 | {numberUntilNext} Until Next Exalt
+     * @return The number until next exalt
      */
-    private String displayExalts(int count) {
+    private int minToNextExalt(int count) {
         if (count < 5) {
-            return String.format("Total {} | 0/5 | {} Until Next Exalt", count, 5 - count);
+            return 5 - count;
         } else if (count < 15) {
-            return String.format("Total {} | 1/5 | {} Until Next Exalt", count, 15 - count);
+            return 15 - count;
         } else if (count < 30) {
-            return String.format("Total {} | 2/5 | {} Until Next Exalt", count, 30 - count);
+            return 30 - count;
         } else if (count < 50) {
-            return String.format("Total {} | 3/5 | {} Until Next Exalt", count, 50 - count);
+            return 50 - count;
         } else if (count < 75) {
-            return String.format("Total {} | 4/5 | {} Until Next Exalt", count, 75 - count);
+            return 75 - count;
         } else {
-            return String.format("Total {} | 5/5 | Done", count);
+            return 76;
         }
     }
+
 }
